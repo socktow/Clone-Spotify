@@ -1,6 +1,6 @@
-import mongoose, { MongooseError } from "mongoose";
+import mongoose from "mongoose";
 
-const albumSchema = new MongooseError.Schema({
+const albumSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -19,6 +19,6 @@ const albumSchema = new MongooseError.Schema({
     },
 })
 
-const albumModel = mongoose.model("album", albumSchema);
+const albumModel = mongoose.models.album || mongoose.model("album", albumSchema);
 
 export default albumModel;
