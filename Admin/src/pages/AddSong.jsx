@@ -1,69 +1,138 @@
-
 import { useState } from "react";
-import { assets } from "../assets/assets";
+import axios from "axios";
+import { url } from "../App";
 
 const AddSong = () => {
-  const [song, setSong] = useState(false);
-  const [image, setImage] = useState(false);
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
   const [album, setAlbum] = useState("");
+  const [audio, setAudio] = useState(null);
+  const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [albumData, setAlbumData] = useState([]);
+  const [message, setMessage] = useState("");
 
-  const onSubmitHandler = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    // Handle form submission here
-    setLoading(false);
+  // Xử lý sự kiện thay đổi file âm thanh
+  const handleAudioChange = (e) => {
+    setAudio(e.target.files[0]);
   };
 
-  return loading ? (
-    <div className="grid place-items-center min-h-[80vh]">
-      <div className="w-16 h-16 border-t-4 border-b-4 border-blue-500 rounded-full animate-spin">
+  // Xử lý sự kiện thay đổi file hình ảnh
+  const handleImageChange = (e) => {
+    setImage(e.target.files[0]);
+  };
 
-      </div>
+  // Gửi form thêm bài hát
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    // Tạo FormData để gửi dữ liệu
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("desc", desc);
+    formData.append("album", album);
+    formData.append("audio", audio);
+    formData.append("image", image);
+
+    try {
+      const response = await axios.post(`${url}/api/song/add`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === 200) {
+        setMessage("Song added successfully!");
+        setName("");
+        setDesc("");
+        setAlbum("");
+        setAudio(null);
+        setImage(null);
+      }
+    } catch (error) {
+      console.error(error);
+      setMessage("Failed to add song.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold text-center mb-6">Add Song</h1>
+
+      {/* Hiển thị thông báo */}
+      {message && <div className="text-center text-red-500 mb-4">{message}</div>}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="name" className="block text-lg font-medium">Song Name</label>
+          <input
+            type="text"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="desc" className="block text-lg font-medium">Description</label>
+          <textarea
+            id="desc"
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="album" className="block text-lg font-medium">Album</label>
+          <input
+            type="text"
+            id="album"
+            value={album}
+            onChange={(e) => setAlbum(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="audio" className="block text-lg font-medium">Audio File</label>
+          <input
+            type="file"
+            id="audio"
+            onChange={handleAudioChange}
+            className="w-full px-4 py-2 border rounded-lg"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="image" className="block text-lg font-medium">Image File</label>
+          <input
+            type="file"
+            id="image"
+            onChange={handleImageChange}
+            className="w-full px-4 py-2 border rounded-lg"
+            required
+          />
+        </div>
+
+        <div className="flex justify-center">
+          <button
+            type="submit"
+            disabled={loading}
+            className={`px-6 py-3 bg-blue-500 text-white rounded-lg ${loading && "opacity-50"}`}
+          >
+            {loading ? "Adding..." : "Add Song"}
+          </button>
+        </div>
+      </form>
     </div>
-  ) : (
-    <form className="flex flex-col items-start gap-8 text-gray-600" onSubmit={onSubmitHandler}>
-      <div className="flex gap-8">
-        <div className="flex flex-col gap-4">
-          <p>Upload Song</p>
-          <input onChange={(e) => setSong(e.target.files[0])} type="file" id="song" accept="audio/*" hidden />
-          <label htmlFor="song">
-            <img src={song ? assets.upload_added : assets.upload_song} className="w-24 cursor-pointer" alt="Upload Song" />
-          </label>
-        </div>
-        <div className="flex flex-col gap-4">
-          <p>Upload Image</p>
-          <input onChange={(e) => setImage(e.target.files[0])} type="file" id="image" accept="image/*" hidden />
-          <label htmlFor="image">
-            <img src={image ? URL.createObjectURL(image) : assets.upload_area}className="w-24 cursor-pointer" alt="Upload Image" />
-          </label>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-4">
-        <p>Song Name</p>
-        <input type="text" className="p-2 border border-gray-300 rounded" value={name} onChange={(e) => setName(e.target.value)} />
-      </div>
-
-      <div className="flex flex-col gap-4">
-        <p>Song Description</p>
-        <textarea className="p-2 border border-gray-300 rounded" rows="4" value={desc} onChange={(e) => setDesc(e.target.value)}></textarea>
-      </div>
-
-      <div className="flex flex-col gap-4">
-        <p>Album</p>
-        <select className="p-2 border border-gray-300 rounded">
-          <option value="album1">Album 1</option>
-          <option value="album2">Album 2</option>
-          <option value="album3">Album 3</option>
-        </select>
-      </div>
-
-      <button type="submit" className="mt-4 bg-blue-500 text-white p-2 rounded">Submit</button>
-    </form>
   );
 };
 

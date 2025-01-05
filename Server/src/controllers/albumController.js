@@ -38,12 +38,22 @@ const listAlbum = async (req, res) => {
 
 const removeAlbum = async (req, res) => {
   try {
-    await albumModel.findByIdAndDelete(req.body.id);
-    return res.status(200).send({ message: "Album removed successfully" });
+    const { id } = req.body; // Lấy ID từ body request
+    if (!id) {
+      return res.status(400).send({ error: "Missing album ID" });
+    }
+
+    const deletedAlbum = await albumModel.findByIdAndDelete(id);
+    if (!deletedAlbum) {
+      return res.status(404).send({ error: "Album not found" });
+    }
+
+    return res.status(200).send({ message: "Album removed successfully", id });
   } catch (error) {
     console.error(error);
     return res.status(500).send({ error: "Server error" });
   }
 };
+
 
 export { addAlbum, listAlbum, removeAlbum };

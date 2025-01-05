@@ -65,8 +65,17 @@ const listSong = async (req, res) => {
 
 const removeSong = async (req, res) => {
   try {
-    await songModel.findByIdAndDelete(req.body.id);
-    return res.status(200).send({ message: "Song removed successfully" });
+    const { id } = req.body; // Lấy ID từ body request
+    if (!id) {
+      return res.status(400).send({ error: "Missing song ID" });
+    }
+
+    const deletedSong = await songModel.findByIdAndDelete(id);
+    if (!deletedSong) {
+      return res.status(404).send({ error: "Song not found" });
+    }
+
+    return res.status(200).send({ message: "Song removed successfully", id });
   } catch (error) {
     console.error(error);
     return res.status(500).send({ error: "Server error" });
