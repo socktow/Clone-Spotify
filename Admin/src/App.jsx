@@ -7,7 +7,7 @@ import AddSong from './pages/AddSong';
 import AddAlbum from './pages/AddAlbum';
 import Slidebar from './components/Slidebar';
 import Navbar from './components/Navbar';
-export const url = "http://localhost:4000";
+export const url = "https://backendyiispotify.vercel.app";
 const App = () => {
   return (
     <div className="flex items-start min-h-screen">
